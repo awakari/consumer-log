@@ -12,6 +12,12 @@ proto:
 		api/grpc/*.proto \
 		api/grpc/queue/*.proto
 
+vet: proto
+	go vet
+
+test: vet
+	go test -race ./...
+
 build: proto
 	CGO_ENABLED=0 GOOS=linux GOARCH= GOARM= go build -o ${BINARY_FILE_NAME} main.go
 	chmod ugo+x ${BINARY_FILE_NAME}
