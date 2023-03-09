@@ -23,7 +23,7 @@ type service struct {
 
 var ErrInternal = errors.New("internal failure")
 
-var ErrMissingQueue = errors.New("missing queue")
+var ErrQueueMissing = errors.New("missing queue")
 
 var ErrQueueFull = errors.New("queue is full")
 
@@ -89,7 +89,7 @@ func decodeError(src error) (dst error) {
 	case codes.OK:
 		dst = nil
 	case codes.NotFound:
-		dst = ErrMissingQueue
+		dst = ErrQueueMissing
 	case codes.ResourceExhausted:
 		dst = ErrQueueFull
 	default:

@@ -1,8 +1,10 @@
 package grpc
 
 import (
+	"consumer-log/api/grpc/queue"
 	"consumer-log/service"
 	"context"
+	"errors"
 	format "github.com/cloudevents/sdk-go/binding/format/protobuf/v2"
 	"github.com/cloudevents/sdk-go/binding/format/protobuf/v2/pb"
 	"github.com/cloudevents/sdk-go/v2/event"
@@ -34,12 +36,16 @@ func (sc serviceController) Submit(ctx context.Context, req *pb.CloudEvent) (res
 	return
 }
 
-func encodeError(svcErr error) (err error) {
+func encodeError(src error) (dst error) {
 	switch {
-	case svcErr == nil:
-		err = nil
+	case src == nil:
+		dst = nil
+	case errors.Is(src, queue.ErrQueueMissing):
+		dst = status.Error(codes.NotFound, src.Error())
+	case errors.Is(src, queue.ErrQueueFull):
+		dst = status.Error(codes.ResourceExhausted, src.Error())
 	default:
-		err = status.Error(codes.Internal, svcErr.Error())
+		dst = status.Error(codes.Internal, src.Error())
 	}
 	return
 }
