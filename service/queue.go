@@ -4,27 +4,30 @@ import (
 	"consumer-log/api/grpc/queue"
 	"consumer-log/config"
 	"context"
+	"fmt"
 	"github.com/cloudevents/sdk-go/v2/event"
 	"time"
 )
 
 type queueMiddleware struct {
-	svc          Service
-	queueSvc     queue.Service
-	queueName    string
-	sleepOnEmpty time.Duration
-	sleepOnError time.Duration
-	batchSize    uint32
+	svc               Service
+	queueSvc          queue.Service
+	queueName         string
+	queueFallbackName string
+	sleepOnEmpty      time.Duration
+	sleepOnError      time.Duration
+	batchSize         uint32
 }
 
 func NewQueueMiddleware(svc Service, queueSvc queue.Service, queueConfig config.QueueConfig) Service {
 	qm := queueMiddleware{
-		svc:          svc,
-		queueSvc:     queueSvc,
-		queueName:    queueConfig.Name,
-		sleepOnEmpty: time.Duration(queueConfig.SleepOnEmptyMillis) * time.Millisecond,
-		sleepOnError: time.Duration(queueConfig.SleepOnErrorMillis) * time.Millisecond,
-		batchSize:    queueConfig.BatchSize,
+		svc:               svc,
+		queueSvc:          queueSvc,
+		queueName:         queueConfig.Name,
+		queueFallbackName: fmt.Sprintf("%s-%s", queueConfig.Name, queueConfig.FallBack.Suffix),
+		sleepOnEmpty:      time.Duration(queueConfig.SleepOnEmptyMillis) * time.Millisecond,
+		sleepOnError:      time.Duration(queueConfig.SleepOnErrorMillis) * time.Millisecond,
+		batchSize:         queueConfig.BatchSize,
 	}
 	go qm.processQueueLoop()
 	return qm

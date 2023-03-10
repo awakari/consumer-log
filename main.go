@@ -36,6 +36,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	if cfg.Queue.FallBack.Enabled {
+		err = queueSvc.SetQueue(context.TODO(), fmt.Sprintf("%s-%s", cfg.Queue.Name, cfg.Queue.FallBack.Suffix), cfg.Queue.Limit)
+	}
+	if err != nil {
+		panic(err)
+	}
 	//
 	svc := service.NewService()
 	svc = service.NewLogging(svc, log)
