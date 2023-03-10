@@ -56,7 +56,7 @@ func (qm queueMiddleware) processQueueOnce(ctx context.Context) (err error) {
 			time.Sleep(qm.sleepOnEmpty)
 		} else {
 			for _, msg := range msgs {
-				_ = qm.svc.Process(ctx, msg)
+				_ = qm.svc.Process(ctx, msg) // NOTE: should send to the fallback queue if returned err is not nil
 			}
 		}
 	}
