@@ -87,6 +87,6 @@ queue:
   batchSize: 100
   limit: 1000
   sleepOn:
-    emptyMillis: 100
+    emptyMillis: 1000
     errorMillis: 1000
   uri: "queue:8080"
