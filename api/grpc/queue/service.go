@@ -25,8 +25,6 @@ var ErrInternal = errors.New("internal failure")
 
 var ErrQueueMissing = errors.New("missing queue")
 
-var ErrQueueFull = errors.New("queue is full")
-
 func NewService(client ServiceClient) Service {
 	return service{
 		client: client,
@@ -100,8 +98,6 @@ func decodeError(src error) (dst error) {
 		dst = nil
 	case codes.NotFound:
 		dst = ErrQueueMissing
-	case codes.ResourceExhausted:
-		dst = ErrQueueFull
 	default:
 		dst = fmt.Errorf("%w: %s", ErrInternal, src)
 	}

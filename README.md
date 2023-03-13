@@ -57,29 +57,57 @@ grpcurl \
   -proto api/grpc/service.proto \
   -d @ \
   localhost:8080 \
-  consumer.Service/Submit
+  consumer.Service/SubmitBatch
 ```
 Payload is basically a Cloud Event:
 ```json
 {
-  "id": "3426d090-1b8a-4a09-ac9c-41f2de24d5ac",
-  "type": "example.type",
-  "source": "example/uri",
-  "spec_version": "1.0",
-  "attributes": {
-    "awakarisubscription": {
-      "ce_string": "f7102c87-3ce4-4bb0-8527-b4644f685b13"
+  "msgs": [
+    {
+      "id": "3426d090-1b8a-4a09-ac9c-41f2de24d5ac",
+      "type": "example.type",
+      "source": "example/uri",
+      "spec_version": "1.0",
+      "attributes": {
+        "subject": {
+          "ce_string": "Obi-Wan Kenobi"
+        },
+        "time": {
+          "ce_timestamp": "1985-04-12T23:20:50.52Z"
+        }
+      },
+      "text_data": "I felt a great disturbance in the force"
     },
-    "awakaridestination": {
-      "ce_string": "starwars"
+    {
+      "id": "3426d090-1b8a-4a09-ac9c-41f2de24d5ad",
+      "type": "example.type",
+      "source": "example/uri",
+      "spec_version": "1.0",
+      "attributes": {
+        "subject": {
+          "ce_string": "Yoda"
+        },
+        "time": {
+          "ce_timestamp": "1985-05-11T12:02:05.25Z"
+        }
+      },
+      "text_data": "Try not. Do or do not. There is no try."
     },
-    "subject": {
-      "ce_string": "Obi-Wan Kenobi"
-    },
-    "time": {
-      "ce_timestamp": "1985-04-12T23:20:50.52Z"
+    {
+      "id": "3426d090-1b8a-4a09-ac9c-41f2de24d5ae",
+      "type": "example.type",
+      "source": "example/uri",
+      "spec_version": "1.0",
+      "attributes": {
+        "subject": {
+          "ce_string": "Qui-Gon Jinn"
+        },
+        "time": {
+          "ce_timestamp": "1985-06-08T14:31:41.16Z"
+        }
+      },
+      "text_data": "The ability to speak does not make you intelligent."
     }
-  },
-  "text_data": "I felt a great disturbance in the force"
+  ]
 }
 ```

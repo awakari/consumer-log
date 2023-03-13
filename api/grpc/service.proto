@@ -5,7 +5,12 @@ package consumer;
 option go_package = "./api/grpc";
 
 import "api/grpc/queue/service.proto";
+import "api/grpc/cloudevents/cloudevent.proto";
 
 service Service {
-  rpc SubmitBatch(queue.SubmitMessageBatchRequest) returns (queue.BatchResponse);
+  rpc SubmitBatch(SubmitBatchRequest) returns (queue.BatchResponse);
+}
+
+message SubmitBatchRequest {
+  repeated pb.CloudEvent msgs = 1;
 }

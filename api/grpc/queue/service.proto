@@ -12,9 +12,6 @@ service Service {
   // Creates a new queue or updates the existing one's length limit.
   rpc SetQueue(SetQueueRequest) returns (google.protobuf.Empty);
 
-  // Enqueue a message to the specified queue.
-  rpc SubmitMessage(SubmitMessageRequest) returns (google.protobuf.Empty);
-
   // Tries to enqueue a batch of messages.
   rpc SubmitMessageBatch(SubmitMessageBatchRequest) returns (BatchResponse);
 

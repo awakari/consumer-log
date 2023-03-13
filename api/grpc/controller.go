@@ -4,11 +4,8 @@ import (
 	"consumer-log/api/grpc/queue"
 	"consumer-log/service"
 	"context"
-	"errors"
 	format "github.com/cloudevents/sdk-go/binding/format/protobuf/v2"
 	"github.com/cloudevents/sdk-go/v2/event"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type (
@@ -23,7 +20,7 @@ func NewServiceController(svc service.Service) ServiceServer {
 	}
 }
 
-func (sc serviceController) SubmitBatch(ctx context.Context, req *queue.SubmitMessageBatchRequest) (resp *queue.BatchResponse, err error) {
+func (sc serviceController) SubmitBatch(ctx context.Context, req *SubmitBatchRequest) (resp *queue.BatchResponse, err error) {
 	var msg *event.Event
 	var msgs []*event.Event
 	for _, msgProto := range req.Msgs {
@@ -39,20 +36,6 @@ func (sc serviceController) SubmitBatch(ctx context.Context, req *queue.SubmitMe
 	}
 	if err != nil {
 		resp.Err = err.Error()
-	}
-	return
-}
-
-func encodeError(src error) (dst error) {
-	switch {
-	case src == nil:
-		dst = nil
-	case errors.Is(src, queue.ErrQueueMissing):
-		dst = status.Error(codes.NotFound, src.Error())
-	case errors.Is(src, queue.ErrQueueFull):
-		dst = status.Error(codes.ResourceExhausted, src.Error())
-	default:
-		dst = status.Error(codes.Internal, src.Error())
 	}
 	return
 }
