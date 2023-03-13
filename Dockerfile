@@ -5,6 +5,6 @@ RUN \
     apk add protoc protobuf-dev make git && \
     make build
 
-FROM scratch
+FROM alpine:3.17.0
 COPY --from=builder /go/src/consumer-log/consumer-log /bin/consumer-log
 ENTRYPOINT ["/bin/consumer-log"]

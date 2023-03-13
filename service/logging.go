@@ -13,7 +13,7 @@ type loggingMiddleware struct {
 	log *slog.Logger
 }
 
-func NewLogging(svc Service, log *slog.Logger) Service {
+func NewLoggingMiddleware(svc Service, log *slog.Logger) Service {
 	return loggingMiddleware{
 		svc: svc,
 		log: log,
