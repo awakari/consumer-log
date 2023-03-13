@@ -20,18 +20,20 @@ func NewLogging(svc Service, log *slog.Logger) Service {
 	}
 }
 
-func (lm loggingMiddleware) Process(ctx context.Context, msg *event.Event) (err error) {
+func (lm loggingMiddleware) ProcessBatch(ctx context.Context, msgs []*event.Event) (count uint32, err error) {
 	defer func() {
-		msgCtx := msg.Context
-		extAttrs := msgCtx.GetExtensions()
-		lm.log.Debug(
-			fmt.Sprintf(
-				"Message: Id=%s, Subscription Id=%s, Destination=%s",
-				msgCtx.GetID(),
-				extAttrs[model.KeySubscription],
-				extAttrs[model.KeyDestination],
-			),
-		)
+		for _, msg := range msgs {
+			msgCtx := msg.Context
+			extAttrs := msgCtx.GetExtensions()
+			lm.log.Debug(
+				fmt.Sprintf(
+					"Message: Id=%s, Subscription Id=%s, Destination=%s",
+					msgCtx.GetID(),
+					extAttrs[model.KeySubscription],
+					extAttrs[model.KeyDestination],
+				),
+			)
+		}
 	}()
-	return lm.svc.Process(ctx, msg)
+	return lm.svc.ProcessBatch(ctx, msgs)
 }

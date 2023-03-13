@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"errors"
 	"github.com/cloudevents/sdk-go/binding/format/protobuf/v2/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -26,7 +27,7 @@ func (cm clientMock) SetQueue(ctx context.Context, in *SetQueueRequest, opts ...
 
 func (cm clientMock) SubmitMessage(ctx context.Context, in *SubmitMessageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	var err error
-	switch in.Queue {
+	switch in.Msg.Id {
 	case "fail":
 		err = status.Error(codes.Internal, "failed to submit the message")
 	case "full":
@@ -35,6 +36,24 @@ func (cm clientMock) SubmitMessage(ctx context.Context, in *SubmitMessageRequest
 		err = status.Error(codes.NotFound, "failed to submit the message")
 	}
 	return &emptypb.Empty{}, err
+}
+
+func (cm clientMock) SubmitMessageBatch(ctx context.Context, in *SubmitMessageBatchRequest, opts ...grpc.CallOption) (*BatchResponse, error) {
+	resp := &BatchResponse{}
+	for _, msg := range in.Msgs {
+		_, err := cm.SubmitMessage(ctx, &SubmitMessageRequest{
+			Queue: in.Queue,
+			Msg:   msg,
+		})
+		if err != nil {
+			if !errors.Is(err, status.Error(codes.Unavailable, "failed to submit the message")) {
+				resp.Err = err.Error()
+			}
+			break
+		}
+		resp.Count++
+	}
+	return resp, nil
 }
 
 func (cm clientMock) Poll(ctx context.Context, in *PollRequest, opts ...grpc.CallOption) (*PollResponse, error) {

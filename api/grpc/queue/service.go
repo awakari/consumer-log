@@ -13,7 +13,7 @@ import (
 
 type Service interface {
 	SetQueue(ctx context.Context, name string, limit uint32) (err error)
-	SubmitMessage(ctx context.Context, queue string, msg *event.Event) (err error)
+	SubmitMessageBatch(ctx context.Context, queue string, msgs []*event.Event) (count uint32, err error)
 	Poll(ctx context.Context, queue string, limit uint32) (msgs []*event.Event, err error)
 }
 
@@ -45,17 +45,27 @@ func (svc service) SetQueue(ctx context.Context, name string, limit uint32) (err
 	return
 }
 
-func (svc service) SubmitMessage(ctx context.Context, queue string, msg *event.Event) (err error) {
+func (svc service) SubmitMessageBatch(ctx context.Context, queue string, msgs []*event.Event) (count uint32, err error) {
 	var msgProto *pb.CloudEvent
-	msgProto, err = format.ToProto(msg)
-	if err == nil {
-		req := SubmitMessageRequest{
-			Queue: queue,
-			Msg:   msgProto,
+	var msgProtos []*pb.CloudEvent
+	for _, msg := range msgs {
+		msgProto, err = format.ToProto(msg)
+		if err != nil {
+			break
 		}
-		_, err = svc.client.SubmitMessage(ctx, &req)
+		msgProtos = append(msgProtos, msgProto)
+	}
+	if err == nil {
+		req := SubmitMessageBatchRequest{
+			Queue: queue,
+			Msgs:  msgProtos,
+		}
+		var resp *BatchResponse
+		resp, err = svc.client.SubmitMessageBatch(ctx, &req)
 		if err != nil {
 			err = decodeError(err)
+		} else {
+			count = resp.Count
 		}
 	}
 	return
