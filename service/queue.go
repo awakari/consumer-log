@@ -33,12 +33,12 @@ func NewQueueMiddleware(svc Service, queueSvc queue.Service, queueConfig config.
 	return qm
 }
 
-func (qm queueMiddleware) Process(ctx context.Context, msg *event.Event) (err error) {
+func (qm queueMiddleware) ProcessBatch(ctx context.Context, msgs []*event.Event) (count uint32, err error) {
 	// NOTE: This dummy implementation that puts all incoming messages in a common queue.
 	// In a more comprehensive implementation the destination queue should be a destination resolved by the router.
 	// Then the polling and processing responsibility transfers to the component that creates subscriptions.
 	// Because a subscription holds the information on the destinations so it "knows" which queue to poll.
-	return qm.queueSvc.SubmitMessage(ctx, qm.queueName, msg)
+	return qm.queueSvc.SubmitMessageBatch(ctx, qm.queueName, msgs)
 }
 
 func (qm queueMiddleware) processQueueLoop() {
@@ -58,9 +58,7 @@ func (qm queueMiddleware) processQueueOnce(ctx context.Context) (err error) {
 		if len(msgs) == 0 {
 			time.Sleep(qm.sleepOnEmpty)
 		} else {
-			for _, msg := range msgs {
-				_ = qm.svc.Process(ctx, msg) // NOTE: should send to the fallback queue if returned err is not nil
-			}
+			_, _ = qm.svc.ProcessBatch(ctx, msgs) // NOTE: should send to the fallback queue if returned err is not nil
 		}
 	}
 	return

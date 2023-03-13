@@ -6,7 +6,7 @@ import (
 )
 
 type Service interface {
-	Process(ctx context.Context, msg *event.Event) (err error)
+	ProcessBatch(ctx context.Context, msgs []*event.Event) (count uint32, err error)
 }
 
 type service struct {
@@ -16,6 +16,6 @@ func NewService() Service {
 	return service{}
 }
 
-func (svc service) Process(ctx context.Context, msg *event.Event) (err error) {
-	return // NOTE: This dummy implementation that does nothing.
+func (svc service) ProcessBatch(ctx context.Context, msgs []*event.Event) (count uint32, err error) {
+	return uint32(len(msgs)), nil
 }

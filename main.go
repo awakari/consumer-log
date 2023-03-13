@@ -44,7 +44,7 @@ func main() {
 	}
 	//
 	svc := service.NewService()
-	svc = service.NewLogging(svc, log)
+	svc = service.NewLoggingMiddleware(svc, log)
 	svc = service.NewQueueMiddleware(svc, queueSvc, cfg.Queue)
 	if err != nil {
 		panic(fmt.Sprintf("failed to init the queue service: %s", err))
